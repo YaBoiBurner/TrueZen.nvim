@@ -58,16 +58,24 @@ local function toggle()
 	return minimalist_false()
 end
 
-function M.main(option)
-	option = option or 0
+local opt_compat = {
+	[0] = "toggle",
+	[1] = "enable",
+	[2] = "disable",
+}
 
-	if option == 0 then -- toggle statuline (on/off)
-		toggle()
-	elseif option == 1 then -- show status line
-		minimalist_true()
-	elseif option == 2 then
-		minimalist_false()
+local actions = {
+	toggle = toggle,
+	enable = minimalist_true,
+	disable = minimalist_true,
+}
+
+function M.main(option)
+	option = option or "toggle"
+	if type(option) == "number" then
+		option = opt_compat[option]
 	end
+	actions[option]()
 end
 
 return M
