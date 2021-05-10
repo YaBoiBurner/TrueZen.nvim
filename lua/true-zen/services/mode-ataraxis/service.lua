@@ -318,10 +318,7 @@ function ataraxis_true()		-- show
 
 	if (ataraxis_was_quitted == "true") then
 		cmd("unlet g:ataraxis_was_quitted")
-		goto skip_normal_quitting
-	end
-
-
+    else
 	cmd("wincmd h")
 	cmd("q")
 	cmd("wincmd l")
@@ -353,8 +350,11 @@ function ataraxis_true()		-- show
 		-- nothing
 	end
 
+	end
+
+
+
 	
-	::skip_normal_quitting::
 
 
 
@@ -448,7 +448,7 @@ function ataraxis_false()		-- hide
 	if (amount_wins > 1) then
 		if (opts["ataraxis"]["force_when_plus_one_window"] == false) then
 			cmd("echo 'TrueZen: TZAtaraxis can not be toggled if there is more than one window open. However, you can force it with the force_when_plus_one_window setting'")
-			goto there_was_more_than_one_window
+			return
 		elseif (opts["ataraxis"]["force_when_plus_one_window"] == true) then
 			cmd("only")
 		end
@@ -735,19 +735,15 @@ function ataraxis_false()		-- hide
 
 	-- statusline stuff
 	if (has_statusline_with_integration == true) then
-		-- ignore
-	else
-		current_statusline = vim.api.nvim_eval("&statusline")
-		cmd("setlocal statusline=-")
-		goto no_need_to_force_hide_again
-	end
-
 	if (opts["ataraxis"]["force_hide_statusline"] == true) then
 		cmd("setlocal statusline=-")
 	end
+	else
+		current_statusline = vim.api.nvim_eval("&statusline")
+		cmd("setlocal statusline=-")
+	end
 
-	-- if it was already forced
-	::no_need_to_force_hide_again::
+
 
 
 
@@ -761,8 +757,6 @@ function ataraxis_false()		-- hide
 	-------------------------=== Integrations ===------------------------
 
 
-	-- everything will be skipped if there was more than one window open
-	::there_was_more_than_one_window::
 
 end
 
