@@ -36,13 +36,19 @@ end
 
 local function toggle()
 	if minimalist_show ~= nil then
-		print(minimalist_show)
-		return minimalist_show and minimalist_false() or minimalist_true()
+		return (minimalist_show and minimalist_false or minimalist_true)()
 	end
 	-- guess by context
+
+	-- note: this is a special case because (nil == (nil and *)) ends up returning true
+	-- no idea why
+	if services.left.left_show == nil and services.bottom.bottom_show == nil and services.top.top_show == nil then
+		minimalist_show = false
+		return minimalist_true()
+	end
 	if services.left.left_show == (services.bottom.bottom_show and services.top.top_show) then
 		minimalist_show = services.left.left_show
-		return (services.left.left_show == nil) and minimalist_true() or minimalist_false()
+		return minimalist_false()
 	end
 	if not (vim.o.showtabline > 0 and (vim.wo.number or vim.wo.relativenumber)) then
 		minimalist_show = false
