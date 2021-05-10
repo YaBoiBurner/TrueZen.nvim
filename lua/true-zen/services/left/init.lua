@@ -1,65 +1,26 @@
 local M = {}
 
-M.left_show = vim.api.nvim_eval("&number > 0 || &relativenumber > 0")
+M.left_show = vim.wo.number > 0 or vim.wo.relativenumber > 0 or vim.wo.signcolumn == "yes"
 
 local service = require("true-zen.services.left.service")
-local cmd = vim.cmd
 
 -- show and hide left funcs
 local function left_true()
-	M.left_show = 1
+	M.left_show = true
 	service.left_true()
 end
 
 local function left_false()
-	M.left_show = 0
+	M.left_show = false
 	service.left_false()
 end
 
 local function toggle()
-	if M.left_show == 1 then -- left true; being shown
-		left_false()
-	elseif M.left_show == 0 then -- left false; being hidden
-		left_true()
-	elseif M.left_show == nil then -- show var is nil
-		M.left_show = vim.api.nvim_eval("&number > 0 || &relativenumber > 0")
-		if vim.api.nvim_eval("&number > 0 || &relativenumber > 0") == 1 then
-			M.left_show = 1
-			toggle()
-		elseif vim.api.nvim_eval("&signcolumn") == "yes" then
-			M.left_show = 1
-			toggle()
-		else
-			M.left_show = 0
-			toggle()
-		end
-	else
-		cmd("echo 'none of the above'")
-		-- nothing
-	end
+	return M.left_show and left_false() or left_true()
 end
 
 function M.resume()
-	if M.left_show == 1 then -- left true; shown
-		left_true()
-	elseif M.left_show == 0 then -- left false; hidden
-		left_false()
-	elseif M.left_show == nil then -- show var is nil
-		M.left_show = vim.api.nvim_eval("&number > 0 || &relativenumber > 0")
-		if vim.api.nvim_eval("&number > 0 || &relativenumber > 0") == 1 then
-			M.left_show = 1
-			M.resume()
-		elseif vim.api.nvim_eval("&signcolumn") == "yes" then
-			M.left_show = 1
-			M.resume()
-		else
-			M.left_show = 0
-			M.resume()
-		end
-	else
-		cmd("echo 'none of the above'")
-		-- nothing
-	end
+	return M.left_show and left_true() or left_false()
 end
 
 function M.main(option)
