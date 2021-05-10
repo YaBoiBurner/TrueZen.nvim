@@ -1,5 +1,3 @@
-
-
 local service = require("true-zen.services.left.service")
 local cmd = vim.cmd
 
@@ -15,17 +13,16 @@ local function left_false()
 end
 
 local function toggle()
-
-	if (left_show == 1) then				-- left true; being shown
+	if left_show == 1 then -- left true; being shown
 		left_false()
-	elseif (left_show == 0) then			-- left false; being hidden
+	elseif left_show == 0 then -- left false; being hidden
 		left_true()
-	elseif (left_show == nil) then			-- show var is nil
+	elseif left_show == nil then -- show var is nil
 		left_show = vim.api.nvim_eval("&number > 0 || &relativenumber > 0")
-		if (vim.api.nvim_eval("&number > 0 || &relativenumber > 0") == 1) then
+		if vim.api.nvim_eval("&number > 0 || &relativenumber > 0") == 1 then
 			left_show = 1
 			toggle()
-		elseif (vim.api.nvim_eval("&signcolumn") == "yes") then
+		elseif vim.api.nvim_eval("&signcolumn") == "yes" then
 			left_show = 1
 			toggle()
 		else
@@ -36,23 +33,19 @@ local function toggle()
 		cmd("echo 'none of the above'")
 		-- nothing
 	end
-
-
-
 end
 
 function resume()
-
-	if (left_show == 1) then				-- left true; shown
+	if left_show == 1 then -- left true; shown
 		left_true()
-	elseif (left_show == 0) then			-- left false; hidden
+	elseif left_show == 0 then -- left false; hidden
 		left_false()
-	elseif (left_show == nil) then			-- show var is nil
+	elseif left_show == nil then -- show var is nil
 		left_show = vim.api.nvim_eval("&number > 0 || &relativenumber > 0")
-		if (vim.api.nvim_eval("&number > 0 || &relativenumber > 0") == 1) then
+		if vim.api.nvim_eval("&number > 0 || &relativenumber > 0") == 1 then
 			left_show = 1
 			resume()
-		elseif (vim.api.nvim_eval("&signcolumn") == "yes") then
+		elseif vim.api.nvim_eval("&signcolumn") == "yes" then
 			left_show = 1
 			resume()
 		else
@@ -64,26 +57,23 @@ function resume()
 		-- nothing
 	end
 end
-
 
 function main(option)
-
 	option = option or 0
 
-	if (option == 0) then			-- toggle left (on/off)
+	if option == 0 then -- toggle left (on/off)
 		toggle()
-	elseif (option == 1) then		-- show left
+	elseif option == 1 then -- show left
 		left_true()
-	elseif (option == 2) then
+	elseif option == 2 then
 		left_false()
 	else
 		-- not recognized
 	end
 end
 
-
 return {
 	main = main,
 	resume = resume,
-	left_show = left_show
+	left_show = left_show,
 }
