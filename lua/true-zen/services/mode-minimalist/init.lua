@@ -1,11 +1,11 @@
 local M = {}
 
+local minimalist_show
+
 local services = require("true-zen.services")
 
 local service = require("true-zen.services.mode-minimalist.service")
 local true_zen = require("true-zen")
-
-local api = vim.api
 
 -- show and hide minimalist funcs
 local function minimalist_true() -- show everything
@@ -13,7 +13,7 @@ local function minimalist_true() -- show everything
 		true_zen.before_minimalist_mode_shown()
 	end
 
-	minimalist_show = 1
+	minimalist_show = true
 	service.minimalist_true()
 
 	if true_zen.get_config().events.after_minimalist_mode_shown then
@@ -26,7 +26,7 @@ local function minimalist_false() -- hide everything
 		true_zen.before_minimalist_mode_hidden()
 	end
 
-	minimalist_show = 0
+	minimalist_show = false
 	service.minimalist_false()
 
 	if true_zen.get_config().events.after_minimalist_mode_hidden then
@@ -34,59 +34,22 @@ local function minimalist_false() -- hide everything
 	end
 end
 
--- 1 if being shown
--- 0 if being hidden
 local function toggle()
-	-- minimalist_show = vim.api.nvim_eval("&laststatus > 0 || &showtabline > 0")
-	if minimalist_show == 1 then -- minimalist true, shown; thus, hide
-		minimalist_false()
-	elseif minimalist_show == 0 then -- minimalist false, hidden; thus, show
-		minimalist_true()
-	elseif minimalist_show == nil then
-		-- guess by context
-		if
-			(services.left.left_show == nil)
-			and (services.bottom.bottom_show == nil)
-			and (services.top.top_show == nil)
-		then
-			minimalist_show = 0
-			minimalist_false()
-		elseif
-			(services.left.left_show == true)
-			and (services.bottom.bottom_show == true)
-			and (services.top.top_show == true)
-		then
-			minimalist_show = 1
-			minimalist_false()
-		elseif
-			(services.left.left_show == false)
-			and (services.bottom.bottom_show == false)
-			and (services.top.top_show == false)
-		then
-			minimalist_show = 0
-			minimalist_true()
-		elseif
-			(api.nvim_eval("&laststatus > 0 || &showtabline > 0") == 1)
-			and (api.nvim_eval("&showtabline > 0") == 1)
-			and (api.nvim_eval("&number > 0 || &relativenumber > 0") == 1)
-		then
-			minimalist_show = 1
-			minimalist_false()
-		elseif
-			(api.nvim_eval("&laststatus > 0 || &showtabline > 0") == 0)
-			and (api.nvim_eval("&showtabline > 0") == 0)
-			and (api.nvim_eval("&number > 0 || &relativenumber > 0") == 0)
-		then
-			minimalist_show = 0
-			minimalist_true()
-		else
-			minimalist_show = 1
-			minimalist_false()
-		end
-	else
-		minimalist_show = 1
-		minimalist_false()
+	if minimalist_show ~= nil then
+		print(minimalist_show)
+		return minimalist_show and minimalist_false() or minimalist_true()
 	end
+	-- guess by context
+	if services.left.left_show == (services.bottom.bottom_show and services.top.top_show) then
+		minimalist_show = services.left.left_show
+		return (services.left.left_show == nil) and minimalist_true() or minimalist_false()
+	end
+	if not (vim.o.showtabline > 0 and (vim.wo.number or vim.wo.relativenumber)) then
+		minimalist_show = false
+		return minimalist_true()
+	end
+	minimalist_show = true
+	return minimalist_false()
 end
 
 function M.main(option)
