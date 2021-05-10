@@ -96,16 +96,24 @@ local function toggle()
 	end
 end
 
-function M.main(option)
-	option = option or 0
+local opt_compat = {
+	[0] = "toggle",
+	[1] = "enable",
+	[2] = "disable",
+}
 
-	if option == 0 then -- toggle focus (on/off)
-		toggle()
-	elseif option == 1 then -- focus window
-		focus_true()
-	elseif option == 2 then -- unfocus window
-		focus_false()
+local actions = {
+	toggle = toggle,
+	enable = focus_true,
+	disable = focus_false,
+}
+
+function M.main(option)
+	option = option or "toggle"
+	if type(option) == "number" then
+		option = opt_compat[option]
 	end
+	actions[option]()
 end
 
 return M
