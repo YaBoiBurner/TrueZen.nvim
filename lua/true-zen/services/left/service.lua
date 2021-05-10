@@ -1,4 +1,6 @@
-local opts = require("true-zen.config").options
+local M = {}
+
+local TZ = require("true-zen")
 local cmd_settings = require("true-zen.utils.cmd_settings")
 
 -- left specific options
@@ -6,15 +8,14 @@ local cmd_settings = require("true-zen.utils.cmd_settings")
 -- set relativenumber
 -- set signcolumn=no
 
-function left_true() -- show
-	cmd_settings.map_settings(opts["left"], true, "LEFT")
+-- show
+function M.left_true()
+	cmd_settings.map_settings(TZ.get_config().left, true, "LEFT")
 end
 
-function left_false() -- hide
-	cmd_settings.map_settings(opts["left"], false, "LEFT")
+-- hide
+function M.left_false()
+	cmd_settings.map_settings(TZ.get_config().left, false, "LEFT")
 end
 
-return {
-	left_true = left_true,
-	left_false = left_false,
-}
+return M
