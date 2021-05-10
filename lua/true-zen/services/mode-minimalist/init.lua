@@ -1,35 +1,35 @@
+local M = {}
+
+local services = require("true-zen.services")
+
 local service = require("true-zen.services.mode-minimalist.service")
-local opts = require("true-zen.config").options
-local bottom = require("true-zen.services.bottom.init")
-local top = require("true-zen.services.top.init")
-local left = require("true-zen.services.left.init")
 local true_zen = require("true-zen")
 
 local api = vim.api
 
 -- show and hide minimalist funcs
 local function minimalist_true() -- show everything
-	if opts.events.before_minimalist_mode_shown then
+	if true_zen.get_config().events.before_minimalist_mode_shown then
 		true_zen.before_minimalist_mode_shown()
 	end
 
 	minimalist_show = 1
 	service.minimalist_true()
 
-	if opts.events.after_minimalist_mode_shown then
+	if true_zen.get_config().events.after_minimalist_mode_shown then
 		true_zen.after_minimalist_mode_shown()
 	end
 end
 
 local function minimalist_false() -- hide everything
-	if opts.events.before_minimalist_mode_hidden then
+	if true_zen.get_config().events.before_minimalist_mode_hidden then
 		true_zen.before_minimalist_mode_hidden()
 	end
 
 	minimalist_show = 0
 	service.minimalist_false()
 
-	if opts.events.after_minimalist_mode_hidden then
+	if true_zen.get_config().events.after_minimalist_mode_hidden then
 		true_zen.after_minimalist_mode_hidden()
 	end
 end
@@ -44,13 +44,25 @@ local function toggle()
 		minimalist_true()
 	elseif minimalist_show == nil then
 		-- guess by context
-		if (left.left_show == nil) and (bottom.bottom_show == nil) and (top.top_show == nil) then
+		if
+			(services.left.left_show == nil)
+			and (services.bottom.bottom_show == nil)
+			and (services.top.top_show == nil)
+		then
 			minimalist_show = 0
 			minimalist_false()
-		elseif (left.left_show == true) and (bottom.bottom_show == true) and (top.top_show == true) then
+		elseif
+			(services.left.left_show == true)
+			and (services.bottom.bottom_show == true)
+			and (services.top.top_show == true)
+		then
 			minimalist_show = 1
 			minimalist_false()
-		elseif (left.left_show == false) and (bottom.bottom_show == false) and (top.top_show == false) then
+		elseif
+			(services.left.left_show == false)
+			and (services.bottom.bottom_show == false)
+			and (services.top.top_show == false)
+		then
 			minimalist_show = 0
 			minimalist_true()
 		elseif
@@ -77,7 +89,7 @@ local function toggle()
 	end
 end
 
-function main(option)
+function M.main(option)
 	option = option or 0
 
 	if option == 0 then -- toggle statuline (on/off)
@@ -89,6 +101,4 @@ function main(option)
 	end
 end
 
-return {
-	main = main,
-}
+return M
