@@ -24,18 +24,24 @@ function M.resume()
 	return M.bottom_show and bottom_false() or bottom_true()
 end
 
-function M.main(option)
-	option = option or 0
+local opt_compat = {
+	[0] = "toggle",
+	[1] = "enable",
+	[2] = "disable",
+}
 
-	if option == 0 then -- toggle statuline (on/off)
-		toggle()
-	elseif option == 1 then -- show status line
-		bottom_true()
-	elseif option == 2 then
-		bottom_false()
-	else
-		-- not recognized
+local actions = {
+	toggle = toggle,
+	enable = bottom_true,
+	disable = bottom_false,
+}
+
+function M.main(option)
+	option = option or "toggle"
+	if type(option) == "number" then
+		option = opt_compat[option]
 	end
+	actions[option]()
 end
 
 return M
