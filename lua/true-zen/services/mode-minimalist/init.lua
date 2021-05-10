@@ -1,113 +1,81 @@
+local M = {}
 
+local minimalist_show
+
+local services = require("true-zen.services")
 
 local service = require("true-zen.services.mode-minimalist.service")
-local opts = require("true-zen.config").options
-local bottom = require("true-zen.services.bottom.init")
-local top = require("true-zen.services.top.init")
-local left = require("true-zen.services.left.init")
 local true_zen = require("true-zen")
 
-local cmd = vim.cmd
-local api = vim.api
-
 -- show and hide minimalist funcs
-local function minimalist_true()		-- show everything
-	if (opts["events"]["before_minimalist_mode_shown"] == true) then
+local function minimalist_true() -- show everything
+	if true_zen.get_config().events.before_minimalist_mode_shown then
 		true_zen.before_minimalist_mode_shown()
-	else
-		-- nothing
 	end
 
-	minimalist_show = 1
+	minimalist_show = true
 	service.minimalist_true()
 
-	if (opts["events"]["after_minimalist_mode_shown"] == true) then
+	if true_zen.get_config().events.after_minimalist_mode_shown then
 		true_zen.after_minimalist_mode_shown()
-	else
-		-- nothing
 	end
 end
 
-local function minimalist_false()		-- hide everything
-	if (opts["events"]["before_minimalist_mode_hidden"] == true) then
+local function minimalist_false() -- hide everything
+	if true_zen.get_config().events.before_minimalist_mode_hidden then
 		true_zen.before_minimalist_mode_hidden()
-	else
-		-- nothing
 	end
 
-	minimalist_show = 0
+	minimalist_show = false
 	service.minimalist_false()
 
-	if (opts["events"]["after_minimalist_mode_hidden"] == true) then
+	if true_zen.get_config().events.after_minimalist_mode_hidden then
 		true_zen.after_minimalist_mode_hidden()
-	else
-		-- nothing
 	end
 end
 
--- 1 if being shown
--- 0 if being hidden
 local function toggle()
-	-- minimalist_show = vim.api.nvim_eval("&laststatus > 0 || &showtabline > 0")
-	if (minimalist_show == 1) then				-- minimalist true, shown; thus, hide
-		-- cmd("echo 'ONE'")
-		minimalist_false()
-	elseif (minimalist_show == 0) then			-- minimalist false, hidden; thus, show
-		-- cmd("echo 'TWO'")
-		minimalist_true()
-	elseif (minimalist_show == nil) then
-		-- guess by context
-		if ((left.left_show == nil) and (bottom.bottom_show == nil) and (top.top_show == nil)) then
-			-- cmd("echo 'THREE'")
-			minimalist_show = 0
-			minimalist_false()
-		elseif ((left.left_show == true) and (bottom.bottom_show == true) and (top.top_show == true)) then
-			-- cmd("echo 'FOUR'")
-			minimalist_show = 1
-			minimalist_false()
-		elseif ((left.left_show == false) and (bottom.bottom_show == false) and (top.top_show == false)) then
-			-- cmd("echo 'FIVE'")
-			minimalist_show = 0
-			minimalist_true()
-
-		elseif((api.nvim_eval("&laststatus > 0 || &showtabline > 0") == 1) and (api.nvim_eval("&showtabline > 0") == 1) and (api.nvim_eval("&number > 0 || &relativenumber > 0") == 1)) then
-			-- cmd("echo 'SIX'")
-			minimalist_show = 1
-			minimalist_false()
-
-		elseif((api.nvim_eval("&laststatus > 0 || &showtabline > 0") == 0) and (api.nvim_eval("&showtabline > 0") == 0) and (api.nvim_eval("&number > 0 || &relativenumber > 0") == 0)) then
-			-- cmd("echo 'SEVEN'")
-			minimalist_show = 0
-			minimalist_true()
-		else
-			-- cmd("echo 'EIGHT'")
-			minimalist_show = 1
-			minimalist_false()
-		end
-	else
-		-- cmd("echo 'NINE'")
-		minimalist_show = 1
-		minimalist_false()
+	if minimalist_show ~= nil then
+		return (minimalist_show and minimalist_false or minimalist_true)()
 	end
+	-- guess by context
+
+	-- note: this is a special case because (nil == (nil and *)) ends up returning true
+	-- no idea why
+	if services.left.left_show == nil and services.bottom.bottom_show == nil and services.top.top_show == nil then
+		minimalist_show = false
+		return minimalist_true()
+	end
+	if services.left.left_show == (services.bottom.bottom_show and services.top.top_show) then
+		minimalist_show = services.left.left_show
+		return minimalist_false()
+	end
+	if not (vim.o.showtabline > 0 and (vim.wo.number or vim.wo.relativenumber)) then
+		minimalist_show = false
+		return minimalist_true()
+	end
+	minimalist_show = true
+	return minimalist_false()
 end
 
-
-function main(option)
-
-	option = option or 0
-
-	if (option == 0) then			-- toggle statuline (on/off)
-		toggle()
-	elseif (option == 1) then		-- show status line
-		minimalist_true()
-	elseif (option == 2) then
-		minimalist_false()
-	else
-		-- not recognized
-	end
-end
-
-
-return {
-	main = main
+local opt_compat = {
+	[0] = "toggle",
+	[1] = "enable",
+	[2] = "disable",
 }
+
+local actions = {
+	toggle = toggle,
+	enable = minimalist_true,
+	disable = minimalist_true,
+}
+
+function M.main(option)
+	option = option or "toggle"
+	if type(option) == "number" then
+		option = opt_compat[option]
+	end
+	actions[option]()
+end
+
+return M
