@@ -1,6 +1,6 @@
 local M = {}
 
-M.left_show = vim.wo.number > 0 or vim.wo.relativenumber > 0 or vim.wo.signcolumn == "yes"
+M.left_show = vim.wo.number or vim.wo.relativenumber or vim.wo.signcolumn == "yes"
 
 local service = require("true-zen.services.left.service")
 
