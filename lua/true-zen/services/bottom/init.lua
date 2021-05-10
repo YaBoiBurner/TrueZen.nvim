@@ -1,71 +1,41 @@
+local M = {}
 
+M.bottom_show = vim.o.laststatus > 0
 
 local service = require("true-zen.services.bottom.service")
-local cmd = vim.cmd
 
 -- show and hide bottom funcs
 local function bottom_true()
-	bottom_show = 1
+	M.bottom_show = true
 	service.bottom_true()
 end
 
 local function bottom_false()
-	bottom_show = 0
+	M.bottom_show = false
 	service.bottom_false()
 end
 
 local function toggle()
-	bottom_show = vim.api.nvim_eval("&laststatus > 0")
-	if (bottom_show == 1) then				-- bottom true, shown; thus, hide
-		bottom_false()
-	elseif (bottom_show == 0) then			-- bottom false, hidden; thus, show
-		bottom_true()
-	else
-		-- nothing
-	end
+	M.bottom_show = vim.o.laststatus > 0
+	return M.bottom_show and bottom_false() or bottom_true()
 end
 
-function resume()
-
-	if (bottom_show == 1) then				-- bottm true; shown
-		bottom_true()
-	elseif (bottom_show == 0) then			-- status line false; hidden
-		bottom_false()
-	elseif (bottom_show == nil) then			-- show var is nil
-		bottom_show = vim.api.nvim_eval("&laststatus > 0")
-		-- bottom_true()
-	else
-		cmd("echo 'none of the above'")
-		-- nothing
-	end
+function M.resume()
+	return M.bottom_show and bottom_false() or bottom_true()
 end
 
-
-function main(option)
-
+function M.main(option)
 	option = option or 0
 
-	if (option == 0) then			-- toggle statuline (on/off)
+	if option == 0 then -- toggle statuline (on/off)
 		toggle()
-	elseif (option == 1) then		-- show status line
+	elseif option == 1 then -- show status line
 		bottom_true()
-	elseif (option == 2) then
+	elseif option == 2 then
 		bottom_false()
 	else
 		-- not recognized
 	end
 end
 
-
--- vim.api.nvim_exec([[
--- 	augroup toggle_statusline
--- 		autocmd!
--- 		autocmd VimResume,FocusGained * lua resume()
--- 	augroup END
--- ]], false)
-
-return {
-	main = main,
-	resume = resume,
-	bottom_show = bottom_show
-}
+return M
