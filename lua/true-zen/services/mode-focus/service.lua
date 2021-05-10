@@ -1,44 +1,23 @@
-
-
-
-local cmd = vim.cmd
-
+local M = {}
 
 -- bottom specific options
 
-function native_focus_true()		-- show
-
-	cmd("vert resize | resize")
-	cmd("normal! ze")
-
+function M.native_focus_true() -- show
+	vim.cmd("vert resize | resize")
+	vim.api.nvim_feedkeys("ze", "n", true)
 end
 
-function native_focus_false()		-- don't show
-	
-	cmd("wincmd =")
-	cmd("normal! ze")
-
+function M.native_focus_false() -- don't show
+	vim.cmd("wincmd =")
+	vim.api.nvim_feedkeys("ze", "n", true)
 end
 
-function experimental_focus_true()
-
-	cmd("tabe %")
-	
+function M.experimental_focus_true()
+	vim.cmd("tabe %")
 end
 
-function experimental_focus_false()
-
-	cmd("q")
-	
+function M.experimental_focus_false()
+	vim.cmd("q")
 end
 
-
-
-
-return {
-	native_focus_true = native_focus_true,
-	native_focus_false = native_focus_false,
-	experimental_focus_true = experimental_focus_true,
-	experimental_focus_false = experimental_focus_false
-}
-
+return M
