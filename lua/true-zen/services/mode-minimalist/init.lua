@@ -61,11 +61,11 @@ local function toggle()
 			-- cmd("echo 'THREE'")
 			minimalist_show = 0
 			minimalist_false()
-		elseif ((left.left_show == 1) and (bottom.bottom_show == true) and (top.top_show == true)) then
+		elseif ((left.left_show == true) and (bottom.bottom_show == true) and (top.top_show == true)) then
 			-- cmd("echo 'FOUR'")
 			minimalist_show = 1
 			minimalist_false()
-		elseif ((left.left_show == 0) and (bottom.bottom_show == false) and (top.top_show == false)) then
+		elseif ((left.left_show == false) and (bottom.bottom_show == false) and (top.top_show == false)) then
 			-- cmd("echo 'FIVE'")
 			minimalist_show = 0
 			minimalist_true()
