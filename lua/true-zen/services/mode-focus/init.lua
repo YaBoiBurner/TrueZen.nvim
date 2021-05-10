@@ -1,3 +1,7 @@
+local M = {}
+
+local focus_show
+
 local service = require("true-zen.services.mode-focus.service")
 local opts = require("true-zen").get_config()
 
@@ -37,7 +41,7 @@ local function focus_false() -- unfocus window
 		focus_show = 0
 
 		if amount_wins == 1 then
-			vim.cmd("You can not unfocus this window because focusing a window only works when there are more than one.")
+			print("You can not unfocus this window because focusing a window only works when there are more than one.")
 		elseif amount_wins > 1 then
 			service.native_focus_false()
 		end
@@ -97,7 +101,7 @@ local function toggle()
 	end
 end
 
-local function main(option)
+function M.main(option)
 	option = option or 0
 
 	if option == 0 then -- toggle focus (on/off)
@@ -109,6 +113,4 @@ local function main(option)
 	end
 end
 
-return {
-	main = main,
-}
+return M
