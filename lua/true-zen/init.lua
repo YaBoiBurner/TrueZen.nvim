@@ -46,6 +46,7 @@ end
 
 local function setup(custom_opts)
 	require("true-zen.config").set_options(custom_opts)
+	opts = require("true-zen.config").options
 	setup_commands()
 	setup_cursor()
 end
