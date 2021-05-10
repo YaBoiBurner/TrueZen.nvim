@@ -1,4 +1,3 @@
-
 local service = require("true-zen.services.mode-ataraxis.service")
 
 local cmd = vim.cmd
@@ -18,11 +17,11 @@ end
 -- 1 if being shown
 -- 0 if being hidden
 local function toggle()
-	if (ataraxis_show == 1) then				-- ataraxis true, shown; thus, hide
+	if ataraxis_show == 1 then -- ataraxis true, shown; thus, hide
 		ataraxis_false()
-	elseif (ataraxis_show == 0) then			-- ataraxis false, hidden; thus, show
+	elseif ataraxis_show == 0 then -- ataraxis false, hidden; thus, show
 		ataraxis_true()
-	elseif (ataraxis_show == nil) then
+	elseif ataraxis_show == nil then
 		ataraxis_show = 1
 		ataraxis_false()
 	else
@@ -31,24 +30,21 @@ local function toggle()
 	end
 end
 
-
 function main(option)
-
 	option = option or 0
 
-	if (option == 0) then			-- toggle statuline (on/off)
+	if option == 0 then -- toggle statuline (on/off)
 		toggle()
-	elseif (option == 1) then		-- show status line
+	elseif option == 1 then -- show status line
 		ataraxis_true()
-	elseif (option == 2) then
+	elseif option == 2 then
 		ataraxis_false()
 	else
 		-- not recognized
 	end
 end
 
-
 return {
 	main = main,
-	ataraxis_show = ataraxis_show
+	ataraxis_show = ataraxis_show,
 }
