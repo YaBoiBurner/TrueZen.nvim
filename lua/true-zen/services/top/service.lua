@@ -1,25 +1,16 @@
+local M = {}
 
-
-local opts = require("true-zen.config").options
+local TZ = require("true-zen")
 local cmd_settings = require("true-zen.utils.cmd_settings")
 
--- top specific options
--- set showtabline=<num>
-
-function top_true()		-- show
-	-- vim.cmd("echo 'I RAN TRUE'")
-	cmd_settings.map_settings(opts["top"], true, "TOP")
+-- show
+function M.top_true()
+	cmd_settings.map_settings(TZ.get_config().top, true, "TOP")
 end
 
-function top_false()		-- don't show
-	-- vim.cmd("echo 'I RAN FALSE'")
-	cmd_settings.map_settings(opts["top"], false, "TOP")
+-- don't show
+function M.top_false()
+	cmd_settings.map_settings(TZ.get_config().top, false, "TOP")
 end
 
-
-
-return {
-	top_true = top_true,
-	top_false = top_false
-}
-
+return M
