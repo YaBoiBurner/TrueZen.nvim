@@ -1,42 +1,40 @@
-local cmd = vim.cmd
+local M = {}
 
-function set_fillchars()
-	cmd([[set fillchars+=stl:\ ]])
-	cmd([[set fillchars+=stlnc:\ ]])
-	cmd([[set fillchars+=vert:\ ]])
-	cmd([[set fillchars+=fold:\ ]])
-	cmd([[set fillchars+=foldopen:\ ]])
-	cmd([[set fillchars+=foldclose:\ ]])
-	cmd([[set fillchars+=foldsep:\ ]])
-	cmd([[set fillchars+=diff:\ ]])
-	cmd([[set fillchars+=msgsep:\ ]])
-	cmd([[set fillchars+=eob:\ ]])
+local final_fillchars, fillchars_stored
+
+function M.set_fillchars()
+	vim.cmd([[set fillchars+=stl:\ ]])
+	vim.cmd([[set fillchars+=stlnc:\ ]])
+	vim.cmd([[set fillchars+=vert:\ ]])
+	vim.cmd([[set fillchars+=fold:\ ]])
+	vim.cmd([[set fillchars+=foldopen:\ ]])
+	vim.cmd([[set fillchars+=foldclose:\ ]])
+	vim.cmd([[set fillchars+=foldsep:\ ]])
+	vim.cmd([[set fillchars+=diff:\ ]])
+	vim.cmd([[set fillchars+=msgsep:\ ]])
+	vim.cmd([[set fillchars+=eob:\ ]])
 end
 
-function store_fillchars()
-	local fillchars = vim.api.nvim_eval("&fillchars")
+function M.store_fillchars()
+	local fillchars = vim.o.fillchars
 
-	if fillchars == "" or fillchars == "" or fillchars == " " or fillchars == " " or fillchars == nil then
-		-- vim's default fillchars
-		final_fillchars = [[stl:\ ,stlnc:\ ,vert:\│,fold:·,foldopen:-,foldclose:+,foldsep:\|,diff:-,msgsep:\ ,eob:~]]
+	if fillchars == "" or fillchars == " " or fillchars == nil then
+		-- vim's default fillchars are fallen back upon by default
+		final_fillchars = ""
 	else
-		fillchars_escaped_spaces = fillchars:gsub(": ", ":\\ ")
-		fillchars_escaped_thicc_pipes = fillchars_escaped_spaces:gsub(":│", [[:\│]])
-		fillchars_escaped_thin_pipes = fillchars_escaped_thicc_pipes:gsub(":|", [[:\|]])
+		local fillchars_escaped_spaces = fillchars:gsub(": ", ":\\ ")
+		local fillchars_escaped_thicc_pipes = fillchars_escaped_spaces:gsub(":│", [[:\│]])
+		local fillchars_escaped_thin_pipes = fillchars_escaped_thicc_pipes:gsub(":|", [[:\|]])
 		final_fillchars = fillchars_escaped_thin_pipes
 	end
 
 	fillchars_stored = true
 end
 
-function restore_fillchars()
-	if fillchars_stored == true then
-		cmd("set fillchars=" .. final_fillchars .. "")
+function M.restore_fillchars()
+	if fillchars_stored then
+		vim.o.fillchars = final_fillchars
 	end
 end
 
-return {
-	set_fillchars = set_fillchars,
-	store_fillchars = store_fillchars,
-	restore_fillchars = restore_fillchars,
-}
+return M
