@@ -23,18 +23,24 @@ function M.resume()
 	return M.left_show and left_true() or left_false()
 end
 
-function M.main(option)
-	option = option or 0
+local opt_compat = {
+	[0] = "toggle",
+	[1] = "enable",
+	[2] = "disable",
+}
 
-	if option == 0 then -- toggle left (on/off)
-		toggle()
-	elseif option == 1 then -- show left
-		left_true()
-	elseif option == 2 then
-		left_false()
-	else
-		-- not recognized
+local actions = {
+	toggle = toggle,
+	enable = left_true,
+	disable = left_false,
+}
+
+function M.main(option)
+	option = option or "toggle"
+	if type(option) == "number" then
+		option = opt_compat[option]
 	end
+	actions[option]()
 end
 
 return M
