@@ -1,14 +1,10 @@
-
-
 local api = vim.api
 local cmd = vim.cmd
 -- local gl = require("galaxyline")
 
-
-
 function enable_element()
-	require('galaxyline').load_galaxyline()
-	require('galaxyline').galaxyline_augroup()
+	require("galaxyline").load_galaxyline()
+	require("galaxyline").galaxyline_augroup()
 end
 
 function disable_element()
@@ -17,9 +13,7 @@ function disable_element()
 	cmd("setlocal statusline=-")
 end
 
-
-
 return {
 	enable_element = enable_element,
-	disable_element = disable_element
+	disable_element = disable_element,
 }
