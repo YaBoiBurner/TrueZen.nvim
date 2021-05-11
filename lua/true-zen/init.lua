@@ -1,10 +1,12 @@
-local get_config = function()
+local M = {}
+
+function M.get_config()
 	return require("true-zen.config").options
 end
 
 local function setup_commands()
 	-- top, left
-	if get_config().true_false_commands then
+	if M.get_config().true_false_commands then
 		vim.api.nvim_exec(
 			[[
                 " UI components
@@ -29,34 +31,27 @@ local function setup_commands()
 end
 
 local function setup_cursor()
-	if get_config().cursor_by_mode then
+	if M.get_config().cursor_by_mode then
 		vim.o.guicursor = "i-c-ci:ver25,o-v-ve:hor20,cr-sm-n-r:block"
 	end
 end
 
-function before_minimalist_mode_shown()
+function M.before_minimalist_mode_shown()
 end
 
-function before_minimalist_mode_hidden()
+function M.before_minimalist_mode_hidden()
 end
 
-function after_minimalist_mode_shown()
+function M.after_minimalist_mode_shown()
 end
 
-function after_minimalist_mode_hidden()
+function M.after_minimalist_mode_hidden()
 end
 
-local function setup(custom_opts)
+function M.setup(custom_opts)
 	require("true-zen.config").set_options(custom_opts)
 	setup_commands()
 	setup_cursor()
 end
 
-return {
-	setup = setup,
-	before_minimalist_mode_shown = before_minimalist_mode_shown,
-	before_minimalist_mode_hidden = before_minimalist_mode_hidden,
-	after_minimalist_mode_shown = after_minimalist_mode_shown,
-	after_minimalist_mode_hidden = after_minimalist_mode_hidden,
-	get_config = get_config,
-}
+return M
