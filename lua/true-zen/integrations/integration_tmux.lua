@@ -1,14 +1,11 @@
-local cmd = vim.cmd
+local M = {}
 
-function enable_element()
-	cmd("silent !tmux set -g status on")
+function M.enable_element()
+	vim.cmd("silent !tmux set -g status on")
 end
 
-function disable_element()
-	cmd("silent !tmux set -g status off")
+function M.disable_element()
+	vim.cmd("silent !tmux set -g status off")
 end
 
-return {
-	enable_element = enable_element,
-	disable_element = disable_element,
-}
+return M

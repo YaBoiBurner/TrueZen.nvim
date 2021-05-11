@@ -1,14 +1,11 @@
-local cmd = vim.cmd
+local M = {}
 
-function enable_element()
-	cmd("SignifyToggle")
+function M.enable_element()
+	vim.cmd("SignifyToggle")
 end
 
-function disable_element()
-	cmd("SignifyToggle")
+function M.disable_element()
+	vim.cmd("SignifyToggle")
 end
 
-return {
-	enable_element = enable_element,
-	disable_element = disable_element,
-}
+return M

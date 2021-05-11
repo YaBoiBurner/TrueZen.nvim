@@ -1,14 +1,11 @@
-local cmd = vim.cmd
+local M = {}
 
-function enable_element()
-	cmd("silent! GitGutterEnable")
+function M.enable_element()
+	vim.cmd("silent! GitGutterEnable")
 end
 
-function disable_element()
-	cmd("silent! GitGutterDisable")
+function M.disable_element()
+	vim.cmd("silent! GitGutterDisable")
 end
 
-return {
-	enable_element = enable_element,
-	disable_element = disable_element,
-}
+return M
