@@ -1,7 +1,7 @@
 local M = {}
 
 local opts = require("true-zen").get_config()
-local left_service = require("true-zen.services.left.service")
+local integrations = require("true-zen.integrations")
 local mode_minimalist = require("true-zen.services.mode-minimalist")
 local before_after_cmds = require("true-zen.utils.before_after_cmd")
 
@@ -38,31 +38,31 @@ function load_integrations(state)
 		for opt, _ in pairs(opts.integrations) do
 			if opts.integrations[opt] then
 				if opt == "integration_galaxyline" then
-					require("true-zen.integrations.integration_galaxyline").enable_element()
+					integrations.galaxyline.enable_element()
 					has_statusline_with_integration = true
 				elseif opt == "integration_gitgutter" then
 					local is_gitgutter_running = vim.api.nvim_eval("get(g:, 'gitgutter_enabled', 0)")
 
 					if is_gitgutter_running == 0 then -- is not running
-						require("true-zen.integrations.integration_gitgutter").enable_element()
+						integrations.gitgutter.enable_element()
 					end
 				elseif opt == "integration_vim_signify" then
 					local is_vim_signify_running = vim.api.nvim_eval("empty(getbufvar(bufnr(''), 'sy'))")
 
 					if is_vim_signify_running == 0 then -- is not running
-						require("true-zen.integrations.integration_vim_signify").enable_element()
+						integrations.vim_signify.enable_element()
 					end
 				elseif opt == "integration_tmux" then
 					local is_tmux_running = vim.env.TMUX
 
 					if is_tmux_running then -- is running
-						require("true-zen.integrations.integration_tmux").enable_element()
+						integrations.tmux.enable_element()
 					end
 				elseif opt == "integration_vim_airline" then
 					local is_vim_airline_running = vim.fn.exists("#airline")
 
 					if is_vim_airline_running == 0 then -- is not running
-						require("true-zen.integrations.integration_vim_airline").enable_element()
+						integrations.vim_airline.enable_element()
 					end
 
 					has_statusline_with_integration = true
@@ -70,20 +70,20 @@ function load_integrations(state)
 					local is_vim_powerline_running = vim.fn.exists("#PowerlineMain")
 
 					if is_vim_powerline_running == 0 then -- is not running
-						require("true-zen.integrations.integration_vim_powerline").enable_element()
+						integrations.vim_powerline.enable_element()
 					end
 
 					has_statusline_with_integration = true
 				elseif opt == "integration_express_line" then
-					require("true-zen.integrations.integration_express_line").enable_element()
+					integrations.express_line.enable_element()
 
 					has_statusline_with_integration = true
 				elseif opt == "integration_limelight" then
-					require("true-zen.integrations.integration_limelight").disable_element()
+					integrations.limelight.disable_element()
 
 					has_statusline_with_integration = true
 				elseif opt == "integration_gitsigns" then
-					local gs_integration = require("true-zen.integrations.integration_gitsigns")
+					local gs_integration = integrations.gitsigns
 					local gs_config = require("gitsigns")._get_config()
 
 					if gs_ps_current_line_blame == nil then
@@ -108,32 +108,32 @@ function load_integrations(state)
 		for opt, _ in pairs(opts.integrations) do
 			if opts.integrations[opt] then
 				if opt == "integration_galaxyline" then
-					require("true-zen.integrations.integration_galaxyline").disable_element()
+					integrations.galaxyline.disable_element()
 
 					has_statusline_with_integration = true
 				elseif opt == "integration_gitgutter" then
 					local is_gitgutter_running = vim.api.nvim_eval("get(g:, 'gitgutter_enabled', 0)")
 
 					if is_gitgutter_running == 1 then -- is running
-						require("true-zen.integrations.integration_gitgutter").disable_element()
+						integrations.gitgutter.disable_element()
 					end
 				elseif opt == "integration_vim_signify" then
 					local is_vim_signify_running = vim.api.nvim_eval("empty(getbufvar(bufnr(''), 'sy'))")
 
 					if is_vim_signify_running == 1 then -- is running
-						require("true-zen.integrations.integration_vim_signify").disable_element()
+						integrations.vim_signify.disable_element()
 					end
 				elseif opt == "integration_tmux" then
 					local is_tmux_running = vim.env.TMUX
 
 					if is_tmux_running then
-						require("true-zen.integrations.integration_tmux").disable_element()
+						integrations.tmux.disable_element()
 					end
 				elseif opt == "integration_vim_airline" then
 					local is_vim_airline_running = vim.fnexists("#airline")
 
 					if is_vim_airline_running == 1 then -- is running
-						require("true-zen.integrations.integration_vim_airline").disable_element()
+						integrations.vim_airline.disable_element()
 					end
 
 					has_statusline_with_integration = true
@@ -141,20 +141,20 @@ function load_integrations(state)
 					local is_vim_powerline_running = vim.fn.exists("#PowerlineMain")
 
 					if is_vim_powerline_running == 1 then -- is running
-						require("true-zen.integrations.integration_vim_powerline").disable_element()
+						integrations.vim_powerline.disable_element()
 					end
 
 					has_statusline_with_integration = true
 				elseif opt == "integration_express_line" then
-					require("true-zen.integrations.integration_express_line").disable_element()
+					integrations.express_line.disable_element()
 
 					has_statusline_with_integration = true
 				elseif opt == "integration_limelight" then
-					require("true-zen.integrations.integration_limelight").enable_element()
+					integrations.limelight.enable_element()
 
 					has_statusline_with_integration = true
 				elseif opt == "integration_gitsigns" then
-					local gs_integration = require("true-zen.integrations.integration_gitsigns")
+					local gs_integration = integrations.gitsigns
 					local gs_config = require("gitsigns")._get_config()
 
 					gs_ps_current_line_blame = nil
