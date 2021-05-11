@@ -1,6 +1,8 @@
-local opts = require("true-zen.config").options
+local M = {}
+
+local opts = require("true-zen").get_config()
 local left_service = require("true-zen.services.left.service")
-local mode_minimalist = require("true-zen.services.mode-minimalist.init")
+local mode_minimalist = require("true-zen.services.mode-minimalist")
 local before_after_cmds = require("true-zen.utils.before_after_cmd")
 
 local hi_group = require("true-zen.services.mode-ataraxis.modules.hi_group")
@@ -32,9 +34,9 @@ vim.api.nvim_exec(
 function load_integrations(state)
 	state = state or false
 
-	if state == true then
-		for opt, _ in pairs(opts["integrations"]) do
-			if opts["integrations"][opt] == true then
+	if state then
+		for opt, _ in pairs(opts.integrations) do
+			if opts.integrations[opt] then
 				if opt == "integration_galaxyline" then
 					require("true-zen.services.bottom.integrations.integration_galaxyline").enable_element()
 					has_statusline_with_integration = true
@@ -43,50 +45,32 @@ function load_integrations(state)
 
 					if is_gitgutter_running == 0 then -- is not running
 						require("true-zen.services.bottom.integrations.integration_gitgutter").enable_element()
-					elseif is_gitgutter_running == 1 then -- is not running
-						-- nothing
-					else
-						-- nothing either
 					end
 				elseif opt == "integration_vim_signify" then
 					local is_vim_signify_running = vim.api.nvim_eval("empty(getbufvar(bufnr(''), 'sy'))")
 
 					if is_vim_signify_running == 0 then -- is not running
 						require("true-zen.services.bottom.integrations.integration_vim_signify").enable_element()
-					elseif is_vim_signify_running == 1 then -- is running
-						-- nothing
-					else
-						-- nothing either
 					end
 				elseif opt == "integration_tmux" then
-					local is_tmux_running = vim.api.nvim_eval("$TMUX")
+					local is_tmux_running = vim.env.TMUX
 
-					if is_tmux_running ~= "" then -- is running
+					if is_tmux_running then -- is running
 						require("true-zen.services.bottom.integrations.integration_tmux").enable_element()
-					else
-						-- tmux wasn't running
 					end
 				elseif opt == "integration_vim_airline" then
-					local is_vim_airline_running = vim.api.nvim_eval("exists('#airline')")
+					local is_vim_airline_running = vim.fn.exists("#airline")
 
 					if is_vim_airline_running == 0 then -- is not running
 						require("true-zen.services.bottom.integrations.integration_vim_airline").enable_element()
-					elseif is_vim_airline_running == 1 then -- is running
-						-- nothing
-					else
-						-- nothing either
 					end
 
 					has_statusline_with_integration = true
 				elseif opt == "integration_vim_powerline" then
-					local is_vim_powerline_running = vim.api.nvim_eval("exists('#PowerlineMain')")
+					local is_vim_powerline_running = vim.fn.exists("#PowerlineMain")
 
 					if is_vim_powerline_running == 0 then -- is not running
 						require("true-zen.services.bottom.integrations.integration_vim_powerline").enable_element()
-					elseif is_vim_powerline_running == 1 then -- is running
-						-- nothing
-					else
-						-- nothing either
 					end
 
 					has_statusline_with_integration = true
@@ -104,45 +88,25 @@ function load_integrations(state)
 
 					if gs_ps_current_line_blame == nil then
 						gs_integration.toggle_element(0)
-					else
-						if gs_ps_current_line_blame == false then
-							-- it's already false
-						end
 					end
 
 					if gs_ps_numhl == nil then
 						gs_integration.toggle_element(1)
-					else
-						if gs_ps_current_line_blame == false then
-							-- it's already false
-						end
 					end
 
 					if gs_ps_linehl == nil then
 						gs_integration.toggle_element(2)
-					else
-						if gs_ps_linehl == false then
-							-- it's already false
-						end
 					end
 
 					if gs_ps_signs == nil then
 						gs_integration.toggle_element(3)
-					else
-						if gs_ps_signs == false then
-							-- it's already false
-						end
 					end
-				else
-					-- integration not recognized
 				end
-			else
-				-- ignore it
 			end
 		end
-	elseif state == false then
-		for opt, _ in pairs(opts["integrations"]) do
-			if opts["integrations"][opt] == true then
+	else
+		for opt, _ in pairs(opts.integrations) do
+			if opts.integrations[opt] then
 				if opt == "integration_galaxyline" then
 					require("true-zen.services.bottom.integrations.integration_galaxyline").disable_element()
 
@@ -152,50 +116,32 @@ function load_integrations(state)
 
 					if is_gitgutter_running == 1 then -- is running
 						require("true-zen.services.bottom.integrations.integration_gitgutter").disable_element()
-					elseif is_gitgutter_running == 0 then -- is not running
-						-- nothing
-					else
-						-- nothing either
 					end
 				elseif opt == "integration_vim_signify" then
 					local is_vim_signify_running = vim.api.nvim_eval("empty(getbufvar(bufnr(''), 'sy'))")
 
 					if is_vim_signify_running == 1 then -- is running
 						require("true-zen.services.bottom.integrations.integration_vim_signify").disable_element()
-					elseif is_vim_signify_running == 0 then -- is not running
-						-- nothing
-					else
-						-- nothing either
 					end
 				elseif opt == "integration_tmux" then
-					local is_tmux_running = vim.api.nvim_eval("$TMUX")
+					local is_tmux_running = vim.env.TMUX
 
-					if is_tmux_running ~= "" then
+					if is_tmux_running then
 						require("true-zen.services.bottom.integrations.integration_tmux").disable_element()
-					else
-						-- tmux wasn't running
 					end
 				elseif opt == "integration_vim_airline" then
-					local is_vim_airline_running = vim.api.nvim_eval("exists('#airline')")
+					local is_vim_airline_running = vim.fnexists("#airline")
 
 					if is_vim_airline_running == 1 then -- is running
 						require("true-zen.services.bottom.integrations.integration_vim_airline").disable_element()
-					elseif is_vim_airline_running == 0 then -- is not running
-						-- nothing
-					else
-						-- nothing either
 					end
 
 					has_statusline_with_integration = true
 				elseif opt == "integration_vim_powerline" then
-					local is_vim_powerline_running = vim.api.nvim_eval("exists('#PowerlineMain')")
+					local is_vim_powerline_running = vim.fn.exists("#PowerlineMain")
 
 					if is_vim_powerline_running == 1 then -- is running
 						require("true-zen.services.bottom.integrations.integration_vim_powerline").disable_element()
-					elseif is_vim_powerline_running == 0 then -- is not running
-						-- nothing
-					else
-						-- nothing either
 					end
 
 					has_statusline_with_integration = true
@@ -239,113 +185,90 @@ function load_integrations(state)
 					else
 						gs_ps_signs = false
 					end
-				else
-					-- integration not recognized
 				end
-			else
-				-- ignore it
 			end
 		end
 	end
 end
 
-function ataraxis_true() -- show
+function M.ataraxis_true() -- show
 	local ataraxis_was_quitted = ""
 
-	if opts["ataraxis"]["quit_untoggles_ataraxis"] == true then
+	if opts.ataraxis.quit_untoggles_ataraxis then
 		vim.api.nvim_exec([[
 			augroup exit_ataraxis_too
 				autocmd!
 			augroup END
 		]], false)
 
-		ataraxis_was_quitted = vim.api.nvim_eval([[get(g:,"ataraxis_was_quitted", "NONE")]])
+		ataraxis_was_quitted = vim.g.ataraxis_was_quitted or "NONE"
 	end
 
 	if ataraxis_was_quitted == "true" then
-		cmd("unlet g:ataraxis_was_quitted")
+		vim.g.ataraxis_was_quitted = nil
 	else
 		cmd("wincmd h")
 		cmd("q")
 		cmd("wincmd l")
 		cmd("q")
 
-		if opts["ataraxis"]["top_padding"] > 0 or tz_top_padding ~= "NONE" and tonumber(tz_top_padding) > 0 then
+		if opts.ataraxis.top_padding > 0 or tz_top_padding ~= "NONE" and tonumber(tz_top_padding) > 0 then
 			cmd("wincmd k")
 			cmd("q")
 
-			if top_use_passed_params == true then
-				cmd("unlet g:tz_top_padding")
+			if top_use_passed_params then
+				vim.g.tz_top_padding = nil
 				top_use_passed_params = false
 			end
-		else
-			-- nothing
 		end
 
-		if
-			opts["ataraxis"]["bottom_padding"] > 0
-			or tz_bottom_padding ~= "NONE" and tonumber(tz_bottom_padding) > 0
-		then
+		if opts.ataraxis.bottom_padding > 0 or tz_bottom_padding ~= "NONE" and tonumber(tz_bottom_padding) > 0 then
 			cmd("wincmd j")
 			cmd("q")
 
-			if bottom_use_passed_params == true then
-				cmd("unlet g:tz_bottom_padding")
+			if bottom_use_passed_params then
+				vim.g.tz_bottom_padding = nil
 				bottom_use_passed_params = false
 			end
-		else
-			-- nothing
 		end
 	end
 
 	------- general
-	cmd("set fillchars=")
+	vim.o.fillchars = ""
 
 	-- if removed, it's likely that numberline and bottom will be removed
-	cmd([[call BufDo("lua require'true-zen.services.left.init'.main(1)")]])
+	cmd([[call BufDo("lua require'true-zen.services.left'.main(1)")]])
 	------ general
 
 	--------------------------=== Splits stuff ===--------------------------
 	-- return splitbelow and splitright to user settings:
-	if is_splitbelow_set == 1 then
-		-- it's already set
-		-- cmd("set splitbelow")
-	elseif is_splitbelow_set == 0 then
-		cmd("set nosplitbelow")
+	if not is_splitbelow_set then
+		vim.o.splitbelow = false
 	end
 
-	if is_splitright_set == 1 then
-		-- it's already set
-		-- cmd("set splitright")
-	elseif is_splitright_set == 0 then
-		cmd("set nosplitright")
+	if not is_splitright_set then
+		vim.o.splitright = false
 	end
 	--------------------------=== Splits stuff ===--------------------------
 
 	--------------------------=== Fill chars ===--------------------------
 
-	if opts["ataraxis"]["disable_fillchars_configuration"] == false then
+	if not opts.ataraxis.disable_fillchars_configuration then
 		fillchar.restore_fillchars()
-	else
-		-- nothing
 	end
 
 	--------------------------=== Fill chars ===--------------------------
 
 	--------------------------=== Hi Groups ===--------------------------
 
-	if opts["ataraxis"]["disable_bg_configuration"] == false then
+	if not opts.ataraxis.disable_bg_configuration then
 		hi_group.restore_hi_groups()
-	else
-		-- nothing
 	end
 
 	--------------------------=== Hi Groups ===--------------------------
 
-	if has_statusline_with_integration == true then
-		-- ignore
-	else
-		cmd("setlocal statusline=" .. current_statusline .. "")
+	if not has_statusline_with_integration then
+		vim.wo.statusline = current_statusline
 	end
 
 	-------------------------=== Integrations ===------------------------
@@ -361,7 +284,7 @@ function ataraxis_true() -- show
 		[[
 		augroup true_integrations
 			autocmd!
-			autocmd BufWinEnter * if (&modifiable == 1) | execute "lua load_integrations(true)" | endif
+			autocmd BufWinEnter * if &modifiable | execute "lua load_integrations(true)" | endif
 		augroup END
 	]],
 		false
@@ -371,26 +294,24 @@ function ataraxis_true() -- show
 	mode_minimalist.main(1)
 end
 
-function ataraxis_false() -- hide
-	local amount_wins = vim.api.nvim_eval("winnr('$')")
+function M.ataraxis_false() -- hide
+	local amount_wins = #vim.api.nvim_list_wins()
 
 	if amount_wins > 1 then
-		if opts["ataraxis"]["force_when_plus_one_window"] == false then
-			cmd("echo 'TrueZen: TZAtaraxis can not be toggled if there is more than one window open. However, you can force it with the force_when_plus_one_window setting'")
-			return
-		elseif opts["ataraxis"]["force_when_plus_one_window"] == true then
+		if opts.ataraxis.force_when_plus_one_window then
 			cmd("only")
+		else
+			print("TrueZen: TZAtaraxis can not be toggled if there is more than one window open. However, you can force it with the force_when_plus_one_window setting")
+			return
 		end
-	else
-		-- nothing
 	end
 
-	if opts["ataraxis"]["quit_untoggles_ataraxis"] == true then
+	if opts.ataraxis.quit_untoggles_ataraxis then
 		vim.api.nvim_exec(
 			[[
 			augroup exit_ataraxis_too
 				autocmd!
-				autocmd QuitPre * only | let g:the_id = win_getid() | tabe % | call win_gotoid(g:the_id) | close | let g:ataraxis_was_quitted = "true" | execute "lua require('true-zen.services.mode-ataraxis.init').main(0)"
+				autocmd QuitPre * only | let g:the_id = win_getid() | tabe % | call win_gotoid(g:the_id) | close | let g:ataraxis_was_quitted = "true" | execute "lua require('true-zen.services.mode-ataraxis').main(0)"
 			augroup END
 		]],
 			false
@@ -400,32 +321,30 @@ function ataraxis_false() -- hide
 	-- autocmd QuitPre * only | let g:the_id = win_getid() | tabe % | call win_gotoid(g:the_id) | close | let g:ataraxis_was_quitted = "true" | execute "lua ataraxis_true()"
 
 	---------------- solves: Vim(Buffer): E86: Buffer 3 does not exist
-	is_splitbelow_set = vim.api.nvim_eval("&splitbelow")
-	is_splitright_set = vim.api.nvim_eval("&splitright")
+	is_splitbelow_set = vim.o.splitbelow
+	is_splitright_set = vim.o.splitright
 
-	if is_splitbelow_set == 0 or is_splitright_set == 0 then
-		cmd("set splitbelow")
-		cmd("set splitright")
-	else
-		-- continue
+	if not is_splitbelow_set or not is_splitright_set then
+		vim.o.splitbelow = true
+		vim.o.splitright = true
 	end
 	---------------- solves: Vim(Buffer): E86: Buffer 3 does not exist
 
-	if opts["minimalist"]["store_and_restore_settings"] == true then
-		top_has_been_stored = before_after_cmds.get_has_been_stored("TOP")
-		bottom_has_been_stored = before_after_cmds.get_has_been_stored("BOTTOM")
-		left_has_been_stored = before_after_cmds.get_has_been_stored("LEFT")
+	if opts.minimalist.store_and_restore_settings then
+		local top_has_been_stored = before_after_cmds.get_has_been_stored("TOP")
+		local bottom_has_been_stored = before_after_cmds.get_has_been_stored("BOTTOM")
+		local left_has_been_stored = before_after_cmds.get_has_been_stored("LEFT")
 
-		if not (top_has_been_stored == true) then
-			before_after_cmds.store_settings(opts["top"], "TOP")
+		if not top_has_been_stored then
+			before_after_cmds.store_settings(opts.top, "TOP")
 		end
 
-		if not (bottom_has_been_stored == true) then
-			before_after_cmds.store_settings(opts["bottom"], "BOTTOM")
+		if not bottom_has_been_stored then
+			before_after_cmds.store_settings(opts.bottom, "BOTTOM")
 		end
 
-		if not (left_has_been_stored == true) then
-			before_after_cmds.store_settings(opts["left"], "LEFT")
+		if not left_has_been_stored then
+			before_after_cmds.store_settings(opts.left, "LEFT")
 		end
 	end
 
@@ -439,10 +358,10 @@ function ataraxis_false() -- hide
 	load_integrations(false)
 	-------------------------=== Integrations ===------------------------
 
-	tz_top_padding = vim.api.nvim_eval([[get(g:,"tz_top_padding", "NONE")]])
-	tz_left_padding = vim.api.nvim_eval([[get(g:,"tz_left_padding", "NONE")]])
-	tz_right_padding = vim.api.nvim_eval([[get(g:,"tz_right_padding", "NONE")]])
-	tz_bottom_padding = vim.api.nvim_eval([[get(g:, "tz_bottom_padding", "NONE")]])
+	tz_top_padding = vim.g.tz_top_padding or "NONE"
+	tz_left_padding = vim.g.tz_left_padding or "NONE"
+	tz_right_padding = vim.g.tz_right_padding or "NONE"
+	tz_bottom_padding = vim.g.tz_bottom_padding or "NONE"
 
 	local left_padding_cmd = ""
 	local right_padding_cmd = ""
@@ -450,16 +369,15 @@ function ataraxis_false() -- hide
 	local bottom_padding_cmd = ""
 
 	test_ideal_writing_and_just_me = function()
-		if opts["ataraxis"]["ideal_writing_area_width"] > 0 then
+		if opts.ataraxis.ideal_writing_area_width > 0 then
 			-- stuff
-			local window_width = vim.api.nvim_eval("winwidth('%')")
-			local ideal_writing_area_width = opts["ataraxis"]["ideal_writing_area_width"]
+			local window_width = vim.api.nvim_win_get_width(0)
+			local ideal_writing_area_width = opts.ataraxis.ideal_writing_area_width
 
 			if ideal_writing_area_width == window_width then
-				cmd(
-					"echo 'TrueZen: the ideal_writing_area_width setting cannot have the same size as your current window, it must be smaller than "
+				print(
+					"TrueZen: the ideal_writing_area_width setting cannot have the same size as your current window, it must be smaller than "
 						.. window_width
-						.. "'"
 				)
 			else
 				total_left_right_width = window_width - ideal_writing_area_width
@@ -475,36 +393,35 @@ function ataraxis_false() -- hide
 				right_padding_cmd = "vertical resize " .. calculated_right_padding .. ""
 			end
 		else
-			if opts["ataraxis"]["just_do_it_for_me"] == true then
+			if opts.ataraxis.just_do_it_for_me then
 				-- calculate padding
-				local calculated_left_padding = vim.api.nvim_eval("winwidth('%') / 4")
-				local calculated_right_padding = vim.api.nvim_eval("winwidth('%') / 4")
+				local calculated_left_padding = vim.api.nvim_win_get_width(0) / 4
+				local calculated_right_padding = vim.api.nvim_win_get_width(0) / 4
 
 				-- set padding
 				left_padding_cmd = "vertical resize " .. calculated_left_padding .. ""
 				right_padding_cmd = "vertical resize " .. calculated_right_padding .. ""
 			else
 				-- stuff
-				left_padding_cmd = "vertical resize " .. opts["ataraxis"]["left_padding"] .. ""
-				right_padding_cmd = "vertical resize " .. opts["ataraxis"]["right_padding"] .. ""
+				left_padding_cmd = "vertical resize " .. opts.ataraxis.left_padding .. ""
+				right_padding_cmd = "vertical resize " .. opts.ataraxis.right_padding .. ""
 			end
 		end
 	end
 
 	if tz_left_padding ~= "NONE" or tz_right_padding ~= "NONE" then -- not equal to NONE
-		-- right_padding_cmd = "vertical resize "..tz_right_padding..""
 		if not (tz_left_padding == "NONE") then
 			left_padding_cmd = "vertical resize " .. tz_left_padding .. ""
-			cmd("unlet g:tz_left_padding")
+			vim.g.tz_left_padding = nil
 		else
-			left_padding_cmd = "vertical resize " .. opts["ataraxis"]["left_padding"] .. ""
+			left_padding_cmd = "vertical resize " .. opts.ataraxis.left_padding .. ""
 		end
 
 		if not (tz_right_padding == "NONE") then
 			right_padding_cmd = "vertical resize " .. tz_right_padding .. ""
-			cmd("unlet g:tz_right_padding")
+			vim.g.tz_right_padding = nil
 		else
-			right_padding_cmd = "vertical resize " .. opts["ataraxis"]["right_padding"] .. ""
+			right_padding_cmd = "vertical resize " .. opts.ataraxis.right_padding .. ""
 		end
 	else
 		test_ideal_writing_and_just_me()
@@ -514,7 +431,6 @@ function ataraxis_false() -- hide
 	cmd("leftabove vnew")
 	cmd(left_padding_cmd)
 	cmd("setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nocursorline nocursorcolumn nonumber norelativenumber noruler noshowmode noshowcmd laststatus=0")
-	-- fillchars()
 	-------------------- left buffer
 
 	-- return to middle buffer
@@ -524,7 +440,6 @@ function ataraxis_false() -- hide
 	cmd("vnew")
 	cmd(right_padding_cmd)
 	cmd("setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nocursorline nocursorcolumn nonumber norelativenumber noruler noshowmode noshowcmd laststatus=0")
-	-- fillchars()
 	-------------------- right buffer
 
 	-- return to middle buffer
@@ -536,27 +451,23 @@ function ataraxis_false() -- hide
 		cmd(top_padding_cmd)
 		cmd("setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nocursorline nocursorcolumn nonumber norelativenumber noruler noshowmode noshowcmd laststatus=0")
 
-		-- cmd("unlet g:tz_top_padding")
-
 		-- return to middle buffer
 		cmd("wincmd j")
 
 		top_use_passed_params = true
 	else
-		if opts["ataraxis"]["top_padding"] > 0 then
-			-- local top_padding_cmd = "resize "..opts["ataraxis"]["top_padding"]..""
-			top_padding_cmd = "resize " .. opts["ataraxis"]["top_padding"] .. ""
+		if opts.ataraxis.top_padding > 0 then
+			top_padding_cmd = "resize " .. opts.ataraxis.top_padding .. ""
 			cmd("leftabove new")
 			cmd(top_padding_cmd)
 			cmd("setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nocursorline nocursorcolumn nonumber norelativenumber noruler noshowmode noshowcmd laststatus=0")
-			-- fillchars()
 
 			-- return to middle buffer
 			cmd("wincmd j")
-		elseif opts["ataraxis"]["top_padding"] == 0 then
+		elseif opts.ataraxis.top_padding == 0 then
 			-- do nothing
 		else
-			cmd("echo 'invalid option set for top_padding param for TrueZen.nvim plugin. It can only be a number >= 0'")
+			print("invalid option set for top_padding param for TrueZen.nvim plugin. It can only be a number >= 0")
 		end
 	end
 
@@ -566,36 +477,29 @@ function ataraxis_false() -- hide
 		cmd(bottom_padding_cmd)
 		cmd("setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nocursorline nocursorcolumn nonumber norelativenumber noruler noshowmode noshowcmd laststatus=0")
 
-		-- cmd("unlet g:tz_bottom_padding")
-
 		-- return to middle buffer
 		cmd("wincmd k")
 		bottom_use_passed_params = true
 	else
-		if opts["ataraxis"]["bottom_padding"] > 0 then
-			-- local bottom_padding_cmd = "resize "..opts["ataraxis"]["bottom_padding"]..""
-			bottom_padding_cmd = "resize " .. opts["ataraxis"]["bottom_padding"] .. ""
+		if opts.ataraxis.bottom_padding > 0 then
+			bottom_padding_cmd = "resize " .. opts.ataraxis.bottom_padding .. ""
 			cmd("rightbelow new")
 			cmd(bottom_padding_cmd)
 			cmd("setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nocursorline nocursorcolumn nonumber norelativenumber noruler noshowmode noshowcmd laststatus=0")
-			-- fillchars()
 
 			-- return to middle buffer
 			cmd("wincmd k")
-		elseif opts["ataraxis"]["bottom_padding"] == 0 then
-			-- do nothing
+		elseif opts.ataraxis.bottom_padding == 0 then
 		else
-			cmd("echo 'invalid option set for bottom_padding param for TrueZen.nvim plugin. It can only be a number >= 0'")
+			print("invalid option set for bottom_padding param for TrueZen.nvim plugin. It can only be a number >= 0")
 		end
 	end
 
 	--------------------------=== Fill chars ===--------------------------
 
-	if opts["ataraxis"]["disable_fillchars_configuration"] == false then
+	if not opts.ataraxis.disable_fillchars_configuration then
 		fillchar.store_fillchars()
 		fillchar.set_fillchars()
-	else
-		-- nothing
 	end
 
 	--------------------------=== Fill chars ===--------------------------
@@ -617,27 +521,26 @@ function ataraxis_false() -- hide
 	-- cmd([[call BufDo("set fillchars+=vert:\\ ")]])
 
 	-- hide whatever the user set to be hidden on the left hand side of vim
-	cmd([[call BufDo("lua require'true-zen.services.left.init'.main(2)")]])
+	cmd([[call BufDo("lua require'true-zen.services.left'.main(2)")]])
 
 	--------------------------=== Hi Groups ===--------------------------
 
-	if opts["ataraxis"]["disable_bg_configuration"] == false then
+	if not opts.ataraxis.disable_bg_configuration then
 		hi_group.store_hi_groups()
-		hi_group.set_hi_groups(opts["ataraxis"]["custome_bg"])
-	else
-		-- nothing
+		hi_group.set_hi_groups(opts.ataraxis.custome_bg)
 	end
 
 	--------------------------=== Hi Groups ===--------------------------
 
 	-- statusline stuff
-	if has_statusline_with_integration == true then
-		if opts["ataraxis"]["force_hide_statusline"] == true then
-			cmd("setlocal statusline=-")
+	if has_statusline_with_integration then
+		if opts.ataraxis.force_hide_statusline then
+			vim.wo.statusline = "-"
 		end
 	else
-		current_statusline = vim.api.nvim_eval("&statusline")
-		cmd("setlocal statusline=-")
+		-- Note: wo.statusline fails here for some reason
+		current_statusline = vim.o.statusline
+		vim.wo.statusline = "-"
 	end
 
 	-------------------------=== Integrations ===------------------------
@@ -645,7 +548,7 @@ function ataraxis_false() -- hide
 		[[
 		augroup false_integrations
 			autocmd!
-			autocmd BufWinEnter * if (&modifiable == 1) | execute "lua load_integrations(false)" | endif
+			autocmd BufWinEnter * if &modifiable | execute "lua load_integrations(false)" | endif
 		augroup END
 	]],
 		false
@@ -653,7 +556,4 @@ function ataraxis_false() -- hide
 	-------------------------=== Integrations ===------------------------
 end
 
-return {
-	ataraxis_true = ataraxis_true,
-	ataraxis_false = ataraxis_false,
-}
+return M
