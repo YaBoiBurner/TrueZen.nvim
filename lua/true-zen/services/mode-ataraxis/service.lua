@@ -8,6 +8,14 @@ local before_after_cmds = require("true-zen.utils.before_after_cmd")
 local hi_group = require("true-zen.services.mode-ataraxis.modules.hi_group")
 local fillchar = require("true-zen.services.mode-ataraxis.modules.fillchar")
 
+local has_statusline_with_integration
+local gs_ps_current_line_blame, gs_ps_numhl, gs_ps_linehl, gs_ps_signs
+
+local current_statusline
+
+local top_use_passed_params, bottom_use_passed_params
+local is_splitbelow_set, is_splitright_set
+
 local cmd = vim.cmd
 
 vim.api.nvim_exec(
@@ -34,158 +42,128 @@ vim.api.nvim_exec(
 function load_integrations(state)
 	state = state or false
 
-	if state then
-		for opt, _ in pairs(opts.integrations) do
-			if opts.integrations[opt] then
-				if opt == "integration_galaxyline" then
-					integrations.galaxyline.enable_element()
-					has_statusline_with_integration = true
-				elseif opt == "integration_gitgutter" then
-					local is_gitgutter_running = vim.api.nvim_eval("get(g:, 'gitgutter_enabled', 0)")
-
-					if is_gitgutter_running == 0 then -- is not running
-						integrations.gitgutter.enable_element()
-					end
-				elseif opt == "integration_vim_signify" then
-					local is_vim_signify_running = vim.api.nvim_eval("empty(getbufvar(bufnr(''), 'sy'))")
-
-					if is_vim_signify_running == 0 then -- is not running
-						integrations.vim_signify.enable_element()
-					end
-				elseif opt == "integration_tmux" then
-					local is_tmux_running = vim.env.TMUX
-
-					if is_tmux_running then -- is running
-						integrations.tmux.enable_element()
-					end
-				elseif opt == "integration_vim_airline" then
-					local is_vim_airline_running = vim.fn.exists("#airline")
-
-					if is_vim_airline_running == 0 then -- is not running
-						integrations.vim_airline.enable_element()
-					end
-
-					has_statusline_with_integration = true
-				elseif opt == "integration_vim_powerline" then
-					local is_vim_powerline_running = vim.fn.exists("#PowerlineMain")
-
-					if is_vim_powerline_running == 0 then -- is not running
-						integrations.vim_powerline.enable_element()
-					end
-
-					has_statusline_with_integration = true
-				elseif opt == "integration_express_line" then
-					integrations.express_line.enable_element()
-
-					has_statusline_with_integration = true
-				elseif opt == "integration_limelight" then
-					integrations.limelight.disable_element()
-
-					has_statusline_with_integration = true
-				elseif opt == "integration_gitsigns" then
-					local gs_integration = integrations.gitsigns
-					local gs_config = require("gitsigns")._get_config()
-
-					if gs_ps_current_line_blame == nil then
-						gs_integration.toggle_element(0)
-					end
-
-					if gs_ps_numhl == nil then
-						gs_integration.toggle_element(1)
-					end
-
-					if gs_ps_linehl == nil then
-						gs_integration.toggle_element(2)
-					end
-
-					if gs_ps_signs == nil then
-						gs_integration.toggle_element(3)
-					end
-				end
-			end
+	if opts.integrations.integration_galaxyline then
+		if state then
+			integrations.galaxyline.enable_element()
+		else
+			integrations.galaxyline.disable_element()
 		end
-	else
-		for opt, _ in pairs(opts.integrations) do
-			if opts.integrations[opt] then
-				if opt == "integration_galaxyline" then
-					integrations.galaxyline.disable_element()
+		has_statusline_with_integration = true
+	end
+	if opts.integrations.integration_gitgutter then
+		local is_gitgutter_running = vim.api.nvim_eval("get(g:, 'gitgutter_enabled', 0)")
+		if is_gitgutter_running == 0 and state then -- is not running
+			integrations.gitgutter.enable_element()
+		end
+		if is_gitgutter_running == 1 and not state then -- is running
+			integrations.gitgutter.disable_element()
+		end
+	end
+	if opts.integrations.integration_vim_signify then
+		local is_vim_signify_running = vim.api.nvim_eval("empty(getbufvar(bufnr(''), 'sy'))")
 
-					has_statusline_with_integration = true
-				elseif opt == "integration_gitgutter" then
-					local is_gitgutter_running = vim.api.nvim_eval("get(g:, 'gitgutter_enabled', 0)")
+		if is_vim_signify_running == 0 and state then -- is not running
+			integrations.vim_signify.enable_element()
+		end
+		if is_vim_signify_running == 1 and not state then -- is running
+			integrations.vim_signify.disable_element()
+		end
+	end
+	if opts.integrations.integration_tmux and vim.env.TMUX then
+		if state then
+			integrations.tmux.enable_element()
+		else
+			integrations.tmux.disable_element()
+		end
+	end
+	if opts.integrations.integration_vim_airline then
+		local is_vim_airline_running = vim.fn.exists("#airline")
 
-					if is_gitgutter_running == 1 then -- is running
-						integrations.gitgutter.disable_element()
-					end
-				elseif opt == "integration_vim_signify" then
-					local is_vim_signify_running = vim.api.nvim_eval("empty(getbufvar(bufnr(''), 'sy'))")
+		if is_vim_airline_running == 0 and state then -- is not running
+			integrations.vim_airline.enable_element()
+		end
 
-					if is_vim_signify_running == 1 then -- is running
-						integrations.vim_signify.disable_element()
-					end
-				elseif opt == "integration_tmux" then
-					local is_tmux_running = vim.env.TMUX
+		if is_vim_airline_running == 1 and not state then -- is running
+			integrations.vim_airline.disable_element()
+		end
 
-					if is_tmux_running then
-						integrations.tmux.disable_element()
-					end
-				elseif opt == "integration_vim_airline" then
-					local is_vim_airline_running = vim.fnexists("#airline")
+		has_statusline_with_integration = true
+	end
+	if opts.integrations.integration_vim_powerline then
+		local is_vim_powerline_running = vim.fn.exists("#PowerlineMain")
 
-					if is_vim_airline_running == 1 then -- is running
-						integrations.vim_airline.disable_element()
-					end
+		if is_vim_powerline_running == 0 and state then -- is not running
+			integrations.vim_powerline.enable_element()
+		end
+		if is_vim_powerline_running == 1 and not state then -- is running
+			integrations.vim_powerline.disable_element()
+		end
 
-					has_statusline_with_integration = true
-				elseif opt == "integration_vim_powerline" then
-					local is_vim_powerline_running = vim.fn.exists("#PowerlineMain")
+		has_statusline_with_integration = true
+	end
+	if opts.integrations.integration_express_line then
+		if state then
+			integrations.express_line.enable_element()
+		else
+			integrations.express_line.disable_element()
+		end
+		has_statusline_with_integration = true
+	end
+	if opts.integrations.integration_limelight then
+		if state then
+			integrations.limelight.disable_element()
+		else
+			integrations.limelight.enable_element()
+		end
+		has_statusline_with_integration = true
+	end
+	if opts.integrations.integration_gitsigns then
+		local gs_integration = integrations.gitsigns
+		local gs_config = require("gitsigns")._get_config()
+		if state then
+			if gs_ps_current_line_blame == nil then
+				gs_integration.toggle_element(0)
+			end
 
-					if is_vim_powerline_running == 1 then -- is running
-						integrations.vim_powerline.disable_element()
-					end
+			if gs_ps_numhl == nil then
+				gs_integration.toggle_element(1)
+			end
 
-					has_statusline_with_integration = true
-				elseif opt == "integration_express_line" then
-					integrations.express_line.disable_element()
+			if gs_ps_linehl == nil then
+				gs_integration.toggle_element(2)
+			end
 
-					has_statusline_with_integration = true
-				elseif opt == "integration_limelight" then
-					integrations.limelight.enable_element()
+			if gs_ps_signs == nil then
+				gs_integration.toggle_element(3)
+			end
+		else
+			gs_ps_current_line_blame = nil
+			gs_ps_numhl = nil
+			gs_ps_linehl = nil
+			gs_ps_signs = nil
 
-					has_statusline_with_integration = true
-				elseif opt == "integration_gitsigns" then
-					local gs_integration = integrations.gitsigns
-					local gs_config = require("gitsigns")._get_config()
+			if gs_config.current_line_blame == true then
+				gs_integration.toggle_element(0)
+			else
+				gs_ps_current_line_blame = false
+			end
 
-					gs_ps_current_line_blame = nil
-					gs_ps_numhl = nil
-					gs_ps_linehl = nil
-					gs_ps_signs = nil
+			if gs_config.numhl == true then
+				gs_integration.toggle_element(1)
+			else
+				gs_ps_numhl = false
+			end
 
-					if gs_config.current_line_blame == true then
-						gs_integration.toggle_element(0)
-					else
-						gs_ps_current_line_blame = false
-					end
+			if gs_config.linehl == true then
+				gs_integration.toggle_element(2)
+			else
+				gs_ps_linehl = false
+			end
 
-					if gs_config.numhl == true then
-						gs_integration.toggle_element(1)
-					else
-						gs_ps_numhl = false
-					end
-
-					if gs_config.linehl == true then
-						gs_integration.toggle_element(2)
-					else
-						gs_ps_linehl = false
-					end
-
-					if gs_config.signs == true then
-						gs_integration.toggle_element(3)
-					else
-						gs_ps_signs = false
-					end
-				end
+			if gs_config.signs == true then
+				gs_integration.toggle_element(3)
+			else
+				gs_ps_signs = false
 			end
 		end
 	end
@@ -212,7 +190,7 @@ function M.ataraxis_true() -- show
 		cmd("wincmd l")
 		cmd("q")
 
-		if opts.ataraxis.top_padding > 0 or tz_top_padding ~= "NONE" and tonumber(tz_top_padding) > 0 then
+		if opts.ataraxis.top_padding > 0 or (vim.g.tz_top_padding and tonumber(vim.g.tz_top_padding) > 0) then
 			cmd("wincmd k")
 			cmd("q")
 
@@ -222,7 +200,7 @@ function M.ataraxis_true() -- show
 			end
 		end
 
-		if opts.ataraxis.bottom_padding > 0 or tz_bottom_padding ~= "NONE" and tonumber(tz_bottom_padding) > 0 then
+		if opts.ataraxis.bottom_padding > 0 or (vim.g.tz_bottom_padding and tonumber(vim.g.tz_bottom_padding) > 0) then
 			cmd("wincmd j")
 			cmd("q")
 
@@ -301,7 +279,10 @@ function M.ataraxis_false() -- hide
 		if opts.ataraxis.force_when_plus_one_window then
 			cmd("only")
 		else
-			print("TrueZen: TZAtaraxis can not be toggled if there is more than one window open. However, you can force it with the force_when_plus_one_window setting")
+			print(
+				"TrueZen: TZAtaraxis can not be toggled if there is more than one window open. "
+					.. "However, you can force it with the force_when_plus_one_window setting"
+			)
 			return
 		end
 	end
@@ -317,8 +298,6 @@ function M.ataraxis_false() -- hide
 			false
 		)
 	end
-
-	-- autocmd QuitPre * only | let g:the_id = win_getid() | tabe % | call win_gotoid(g:the_id) | close | let g:ataraxis_was_quitted = "true" | execute "lua ataraxis_true()"
 
 	---------------- solves: Vim(Buffer): E86: Buffer 3 does not exist
 	is_splitbelow_set = vim.o.splitbelow
@@ -358,17 +337,31 @@ function M.ataraxis_false() -- hide
 	load_integrations(false)
 	-------------------------=== Integrations ===------------------------
 
-	tz_top_padding = vim.g.tz_top_padding or "NONE"
-	tz_left_padding = vim.g.tz_left_padding or "NONE"
-	tz_right_padding = vim.g.tz_right_padding or "NONE"
-	tz_bottom_padding = vim.g.tz_bottom_padding or "NONE"
+	-- tz_top_padding = vim.g.tz_top_padding or "NONE"
+	-- tz_left_padding = vim.g.tz_left_padding or "NONE"
+	-- tz_right_padding = vim.g.tz_right_padding or "NONE"
+	-- tz_bottom_padding = vim.g.tz_bottom_padding or "NONE"
 
 	local left_padding_cmd = ""
 	local right_padding_cmd = ""
-	local top_padding_cmd = ""
-	local bottom_padding_cmd = ""
+	local top_padding_cmd
+	local bottom_padding_cmd
 
-	test_ideal_writing_and_just_me = function()
+	if vim.g.tz_left_padding or vim.g.tz_right_padding then -- not equal to NONE
+		if not (vim.g.tz_left_padding == nil) then
+			left_padding_cmd = "vertical resize " .. vim.g.tz_left_padding .. ""
+			vim.g.tz_left_padding = nil
+		else
+			left_padding_cmd = "vertical resize " .. opts.ataraxis.left_padding .. ""
+		end
+
+		if not (vim.g.tz_right_padding == nil) then
+			right_padding_cmd = "vertical resize " .. vim.g.tz_right_padding .. ""
+			vim.g.tz_right_padding = nil
+		else
+			right_padding_cmd = "vertical resize " .. opts.ataraxis.right_padding .. ""
+		end
+	else
 		if opts.ataraxis.ideal_writing_area_width > 0 then
 			-- stuff
 			local window_width = vim.api.nvim_win_get_width(0)
@@ -376,11 +369,12 @@ function M.ataraxis_false() -- hide
 
 			if ideal_writing_area_width == window_width then
 				print(
-					"TrueZen: the ideal_writing_area_width setting cannot have the same size as your current window, it must be smaller than "
+					"TrueZen: the ideal_writing_area_width setting cannot have the same size as your current window. "
+						.. "It must be smaller than "
 						.. window_width
 				)
 			else
-				total_left_right_width = window_width - ideal_writing_area_width
+				local total_left_right_width = window_width - ideal_writing_area_width
 
 				if total_left_right_width % 2 > 0 then
 					total_left_right_width = total_left_right_width + 1
@@ -409,24 +403,6 @@ function M.ataraxis_false() -- hide
 		end
 	end
 
-	if tz_left_padding ~= "NONE" or tz_right_padding ~= "NONE" then -- not equal to NONE
-		if not (tz_left_padding == "NONE") then
-			left_padding_cmd = "vertical resize " .. tz_left_padding .. ""
-			vim.g.tz_left_padding = nil
-		else
-			left_padding_cmd = "vertical resize " .. opts.ataraxis.left_padding .. ""
-		end
-
-		if not (tz_right_padding == "NONE") then
-			right_padding_cmd = "vertical resize " .. tz_right_padding .. ""
-			vim.g.tz_right_padding = nil
-		else
-			right_padding_cmd = "vertical resize " .. opts.ataraxis.right_padding .. ""
-		end
-	else
-		test_ideal_writing_and_just_me()
-	end
-
 	-------------------- left buffer
 	cmd("leftabove vnew")
 	cmd(left_padding_cmd)
@@ -445,8 +421,8 @@ function M.ataraxis_false() -- hide
 	-- return to middle buffer
 	cmd("wincmd h")
 
-	if not (tz_top_padding == "NONE") then
-		top_padding_cmd = "resize " .. tz_top_padding .. ""
+	if not (vim.g.tz_top_padding == nil) then
+		top_padding_cmd = "resize " .. vim.g.tz_top_padding .. ""
 		cmd("leftabove new")
 		cmd(top_padding_cmd)
 		cmd("setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nocursorline nocursorcolumn nonumber norelativenumber noruler noshowmode noshowcmd laststatus=0")
@@ -456,6 +432,10 @@ function M.ataraxis_false() -- hide
 
 		top_use_passed_params = true
 	else
+		assert(
+			opts.ataraxis.top_padding >= 0,
+			"invalid option set for top_padding param for TrueZen.nvim plugin. It can only be a number >= 0"
+		)
 		if opts.ataraxis.top_padding > 0 then
 			top_padding_cmd = "resize " .. opts.ataraxis.top_padding .. ""
 			cmd("leftabove new")
@@ -464,15 +444,11 @@ function M.ataraxis_false() -- hide
 
 			-- return to middle buffer
 			cmd("wincmd j")
-		elseif opts.ataraxis.top_padding == 0 then
-			-- do nothing
-		else
-			print("invalid option set for top_padding param for TrueZen.nvim plugin. It can only be a number >= 0")
 		end
 	end
 
-	if not (tz_bottom_padding == "NONE") then
-		bottom_padding_cmd = "resize " .. tz_bottom_padding .. ""
+	if not (vim.g.tz_bottom_padding == nil) then
+		bottom_padding_cmd = "resize " .. vim.g.tz_bottom_padding .. ""
 		cmd("rightbelow new")
 		cmd(bottom_padding_cmd)
 		cmd("setlocal buftype=nofile bufhidden=wipe nomodifiable nobuflisted noswapfile nocursorline nocursorcolumn nonumber norelativenumber noruler noshowmode noshowcmd laststatus=0")
@@ -481,6 +457,10 @@ function M.ataraxis_false() -- hide
 		cmd("wincmd k")
 		bottom_use_passed_params = true
 	else
+		assert(
+			opts.ataraxis.bottom_padding >= 0,
+			"invalid option set for bottom_padding param for TrueZen.nvim plugin. It can only be a number >= 0"
+		)
 		if opts.ataraxis.bottom_padding > 0 then
 			bottom_padding_cmd = "resize " .. opts.ataraxis.bottom_padding .. ""
 			cmd("rightbelow new")
@@ -489,9 +469,6 @@ function M.ataraxis_false() -- hide
 
 			-- return to middle buffer
 			cmd("wincmd k")
-		elseif opts.ataraxis.bottom_padding == 0 then
-		else
-			print("invalid option set for bottom_padding param for TrueZen.nvim plugin. It can only be a number >= 0")
 		end
 	end
 
