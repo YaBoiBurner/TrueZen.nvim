@@ -16,7 +16,7 @@ function M.main(service, command_option)
 	if type(service) == "number" then
 		service = service_compat[service]
 	end
-	return services[service].main()
+	return services[service].main(command_option)
 end
 
 return M
